@@ -31,16 +31,48 @@ const register = async (req, res) => {
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await User.findOne({ email });
+    console.log('Login attempt for email:', email);
 
-    if (!user || user.authType !== 'local' || !(await bcrypt.compare(password, user.password))) {
-      return res.status(400).json({ message: 'Sai email hoặc mật khẩu' });
+    if (!email || !password) {
+      console.log('Missing email or password');
+      return res.status(400).json({ message: 'Vui lòng nhập email và mật khẩu' });
     }
 
-    const token = jwt.sign({ id: user._id, role: user.role }, config.jwt.secret, { expiresIn: '7d' });
-    res.json({ token, user });
+    const user = await User.findOne({ email }).select("+password");
+    if (!user) {
+      console.log('User not found for email:', email);
+      return res.status(400).json({ message: 'Email hoặc mật khẩu không đúng' });
+    }
+
+    if (!user.password) {
+      console.log('User has no password (social login account)');
+      return res.status(400).json({ message: 'Tài khoản này sử dụng đăng nhập qua bên thứ ba' });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      console.log('Password mismatch for user:', email);
+      return res.status(400).json({ message: 'Email hoặc mật khẩu không đúng' });
+    }
+
+    console.log('Successful login for user:', email);
+    const token = jwt.sign({ id: user._id, role: user.role }, config.jwt.secret, {
+      expiresIn: "7d",
+    });
+
+    res.json({
+      user: { 
+        id: user._id, 
+        name: user.name, 
+        email: user.email, 
+        role: user.role,
+        isVerified: user.isVerified
+      },
+      token,
+    });
   } catch (error) {
-    res.status(500).json({ message: 'Lỗi server', error: error.message });
+    console.error("Login error:", error);
+    res.status(500).json({ message: "Lỗi server", error: error.message });
   }
 };
 

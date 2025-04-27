@@ -47,6 +47,10 @@ const AddressesPage = () => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+    // Nếu là checkbox isDefault và đang có 1 địa chỉ duy nhất, không cho phép bỏ chọn
+    if (name === 'isDefault' && addresses.length === 0 && !checked) {
+      return;
+    }
     setAddressForm((prev) => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
@@ -54,13 +58,15 @@ const AddressesPage = () => {
   };
 
   const openAddModal = () => {
+    // Nếu chưa có địa chỉ nào, tự động chọn làm mặc định
+    const isDefault = addresses.length === 0;
     setAddressForm({
       street: '',
       city: '',
       state: '',
       zipCode: '',
       country: '',
-      isDefault: false,
+      isDefault: isDefault,
     });
     setIsAddModalOpen(true);
   };
@@ -246,7 +252,7 @@ const AddressesPage = () => {
                 
                 <div className="mb-4">
                   <label htmlFor="city" className="block text-sm font-medium text-gray-700">
-                    Thành phố
+                    Tỉnh/Thành phố
                   </label>
                   <input
                     type="text"
@@ -261,7 +267,7 @@ const AddressesPage = () => {
                 
                 <div className="mb-4">
                   <label htmlFor="state" className="block text-sm font-medium text-gray-700">
-                    Tỉnh/Thành
+                    Xã/Huyện
                   </label>
                   <input
                     type="text"
@@ -310,6 +316,7 @@ const AddressesPage = () => {
                       id="isDefault"
                       checked={addressForm.isDefault}
                       onChange={handleChange}
+                      disabled={addresses.length === 0 && addressForm.isDefault}
                       className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
                     <label htmlFor="isDefault" className="ml-2 block text-sm text-gray-700">
@@ -428,6 +435,7 @@ const AddressesPage = () => {
                       id="isDefault"
                       checked={addressForm.isDefault}
                       onChange={handleChange}
+                      disabled={addresses.length === 0 && addressForm.isDefault}
                       className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
                     <label htmlFor="isDefault" className="ml-2 block text-sm text-gray-700">

@@ -41,7 +41,7 @@ const ProfilePage = () => {
     };
 
     fetchUserProfile();
-  }, [isAuthenticated, navigate, user, authLoading, updateUser]);
+  }, [isAuthenticated, navigate, authLoading]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });

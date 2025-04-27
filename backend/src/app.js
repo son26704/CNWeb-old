@@ -2,7 +2,9 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const config = require('./config/config');
+const dotenv = require('dotenv');
 
+dotenv.config();
 
 // Import routes
 const userRoutes = require('./routes/user.routes');
@@ -18,6 +20,9 @@ app.use(cors()); // Cho phép CORS từ frontend
 app.use(express.json()); // Parse JSON body
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded body
 // app.use(passport.initialize()); // Khởi tạo Passport cho authentication
+
+// Trust proxy for rate limiter
+app.set('trust proxy', 1);
 
 // Kết nối MongoDB
 mongoose
@@ -40,8 +45,8 @@ app.get('/', (req, res) => {
 
 // Error handler
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ message: 'Something went wrong!' });
+  console.error('Error:', err);
+  res.status(500).json({ message: 'Internal server error' });
 });
 
 // 404 Not Found
@@ -50,7 +55,7 @@ app.use((req, res) => {
 });
 
 // Khởi động server
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Server đang chạy trên cổng ${PORT}`);
 });

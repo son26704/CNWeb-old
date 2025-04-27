@@ -134,6 +134,11 @@ const addAddress = async (userId, addressData) => {
       throw new Error('User not found');
     }
 
+    // Nếu chưa có địa chỉ nào, tự động đặt làm mặc định
+    if (user.addresses.length === 0) {
+      addressData.isDefault = true;
+    }
+
     // Nếu đánh dấu là địa chỉ mặc định, cập nhật tất cả địa chỉ khác
     if (addressData.isDefault) {
       user.addresses.forEach(addr => {
